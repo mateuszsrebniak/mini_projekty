@@ -27,7 +27,9 @@ case when v_miesiac_ur>0 then v_pesel := v_pesel || v_miesiac_ur || substr(v_dat
     else v_pesel := v_pesel || substr(v_data, 3, 2) || substr(v_data, 1, 2) || to_char(round(dbms_random.value(100, 999)));
 end case;
 
+-- dodaje parzystą cyfrę dla kobiet
 case when v_plec_check = 'K' then v_pesel := v_pesel || round(dbms_random.value(1, 4)) * 2;
+-- dodaje nieparzystą cyfrę dla mężczyzn
     else v_pesel := v_pesel || (round(dbms_random.value(0, 4)) * 2) + 1;
 end case;
 v_pesel := v_pesel || ceil(dbms_random.value(0, 9));
