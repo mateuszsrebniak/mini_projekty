@@ -1,49 +1,85 @@
 -- utworzenie tabeli przechowującej wersy
 create table  "wersy" (	
-		"id" number generated always as identity
-   ,	"wers" varchar2(1000 char)
-   , 	constraint "pk_wersy" primary key ("id")
+		"id" 			number generated always as identity
+   ,	"wers" 			varchar2(1000 char)
+   , 	constraint 		"pk_wersy" primary key ("id")
 )
 /
--- utworzenie procedury wstawiającej wersy do tabeli 'wersy', 
+create table "wiersze" (
+		"id_wiersza" 	number(10,0)
+	,	"nr_wersu" 		number(10,0)
+	,	"id_wersu" 		number(10,0)
+	,	constraint 		"pk_wiersze" primary key("id_wiersza", "nr_wersu", "id_wersu")
+	,	constraint 		"fk_id_wersu" foreign key("id_wersu") references wersy("id")
+);
+--utworzenie typu tabelarycznego
+create or replace type t_tbl is table of varchar2(1000);
+-- pakiet pck_wiersz
+create or replace package pck_wiersz as
+-- procedura wstawiająca wersy do tabeli 'wersy', 
 -- jako parametr (p_tekst) przyjmuje tekst, w którym wersy oddzielone są od siebie separatorem '/'
-create or replace procedure wstaw_wersy(p_tekst varchar2) as
-type t_tbl is table of varchar(1000);
+procedure wstaw_wersy(p_tekst varchar2);
+/*procedura generująca nowy wiersz na podstawie prawdziwych wersów i wstawiająca go do tabeli 'wiersze' (w praktyce taki sztuczny wiersz często jest ciekawszy 
+niż składające się na niego oryginały, no ale co zrobić, taką mamy poezję. Na szczęście poezji nikt już na poważnie nie czyta, 
+no - może poza samymi poetami, którzy czytają się wzajemnie i nieustannie porównują to do Rielkego, to do Szymborksiej, to do 
+Bóg wie kogo. Choć może i w tym problem, że nikt nie czyta? Może gdyby czytano poezję tak chętnie, jak czyta się fantasy 
+(tutaj z kolei każdy jest nowym Tolkienem! Tylu tych nowych Tolkienów, że to już żadna nowość)... wracając jednak - gdyby 
+czytano poezję równie chętnie jak fantasy i gdyby zarobek był podobny, może wówczas najpłodniejsze umysły literackie nie 
+szłyby w prozę, a własnie w krótsze formy? Nikt mi przecież nie powie, że Hanna Krall ze swoją skondesowaną do maksimum prozą 
+nie byłaby zdolna skondensować jej do poezji! Zresztą powiedział Kieślowski (swoją drogą przyjaciel Hanny Krall), że to, na 
+wyrażnie czego za pomocą filmu on potrzebował kilku milionów franków, Szymborska wyraziła zgrabniej za pomocą kartki, 
+pióra i kilku linijek. No ale ostatecznie, kto dziś pamięta wiersz Szymborskiej? (niestety!)...
+@param p_licz_wersow - jako parametr przyjmuje liczbę wersów, z jakiej ma składać się nowy wiersz*/ 
+procedure generuj(p_licz_wersow number);
+-- funkcja wyświetlająca wiersz o podanym w parametrze id_wiersza
+function wyswietl_wiersz(p_id_wiersza number) return t_tbl;
+end pck_wiersz;
+
+create or replace package body pck_wiersz as
+---------------------------------------------
+procedure wstaw_wersy(p_tekst varchar2) as
 t_wersy t_tbl := t_tbl();
 begin
-  select trim(regexp_substr(p_tekst, '([^/]*)(/|$)', 1, level, null, 1 ))
-  bulk collect into t_wersy from dual
-  connect by level < regexp_count(p_tekst, '([^/]*)(/|$)');
-  for i in t_wersy.first.. t_wersy.last
-  loop
-  insert into wersy (wers) values (t_wersy(i));
-  end loop;
-end;
-/
-/*utworzenie procedury generującej nowy wers na podstawie prawdziwych wersów (w praktyce taki sztuczny wiersz często jest ciekawszy 
-niż składające się na niego oryginały, no ale co zrobić, taką mamy poezję. Na szczęście poezji nikt już na poważnie nie czyta, 
-no - może poza samymi poetami, którzy czytają się wzajemnie i nieustannie porównują to do Rielkego, to do Szymborksiej, to do Bóg wie kogo. 
-Choć może i w tym problem, że nikt nie czyta? Może gdyby czytano poezję tak chętnie, jak czyta się fantasy (tutaj z kolei każdy jest 
-nowym Tolkienem! Tylu tych nowych Tolkienów, że to już żadna nowość)... wracając jednak - gdyby czytano poezję równie chętnie jak 
-fantasy i gdyby zarobek był podobny, może wówczas najpłodniejsze umysły literackie nie szłyby w prozę, a własnie w krótsze formy? 
-Nikt mi przecież nie powie, że Hanna Krall ze swoją skondesowaną do maksimum prozą nie byłaby zdolna skondensować jej do poezji! 
-Zresztą powiedział Kieślowski (swoją drogą przyjaciel Hanny Krall), że to, na wyrażnie czego za pomocą filmu on potrzebował kilku milionów 
-franków, Szymborska wyraziła zgrabniej za pomocą kartki, pióra i kilku linijek. No ale ostatecznie, kto dziś pamięta wiersz Szymborskiej? 
-(niestety!)...*/ 
-create or replace procedure generuj_wiersz(p_licz_wersow number) as
+    select trim(regexp_substr(p_tekst, '([^/]*)(/|$)', 1, level, null, 1 ))
+    bulk collect into t_wersy from dual
+    connect by level < regexp_count(p_tekst, '([^/]*)(/|$)');
+    for i in t_wersy.first.. t_wersy.last
+    loop
+        insert into wersy (wers) values (t_wersy(i));
+    end loop;
+end wstaw_wersy;
+---------------------------------------------
+procedure generuj(p_licz_wersow number) as
+v_id number;
+v_id_wiersza number;
 v_wers varchar2(1000);
 begin
+    select nvl(max(id_wiersza), 0) + 1 into v_id_wiersza from wiersze;
     for i in 1..p_licz_wersow
     loop
-        select wers into v_wers from wersy 
+        select id, wers into v_id, v_wers from wersy 
         order by dbms_random.value() fetch first 1 row only;
+        insert into wiersze(id_wiersza, nr_wersu, id_wersu)
+            values(v_id_wiersza, i, v_id);
         dbms_output.put_line(v_wers);
     end loop;
-end;
-/
+end generuj;
+---------------------------------------------
+function wyswietl_wiersz(p_id_wiersza number) return t_tbl as
+t_wiersz t_tbl := t_tbl();
+begin
+    select w2.wers bulk collect into t_wiersz
+    from wiersze w1 join wersy w2 on w1.id_wersu = w2.id
+    where w1.id_wiersza = p_id_wiersza
+    order by w1.nr_wersu;
+    return t_wiersz;
+end wyswietl_wiersz;
+---------------------------------------------
+end pck_wiersz;
+
 --wstawianie wersów za pomocą procedury wstaw_wersy()
 BEGIN
-	wstaw_wersy('Kocham Chariel więc kiedy powiedziała/
+	pck_wiersz.wstaw_wersy('Kocham Chariel więc kiedy powiedziała/
 resztę życia spędzę tylko z mężczyzną z którym będę się czuła/
 naprawdę świetnie/
 poczułem w tym pewną szansę dla siebie/
@@ -654,4 +690,12 @@ kiedy jest nudnością życia .../
 
 ...niech sobie poduma.../
 ');
+end;
+
+--wstawianie wierszy za pomocą procedury 
+begin
+    for i in 1..30
+    loop
+        pck_wiersz.generuj(trunc(dbms_random.value(2, 20)));
+    end loop;
 end;
