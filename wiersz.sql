@@ -1,17 +1,32 @@
 -- utworzenie tabeli przechowującej wersy
 create table  "wersy" (	
 		"id" 			number generated always as identity
-   ,	"wers" 			varchar2(1000 char)
-   , 	constraint 		"pk_wersy" primary key ("id")
+	,	"wers" 			varchar2(1000 char)
+	, 	constraint 		"pk_wersy" primary key ("id")
 )
 /
-create table "wiersze" (
-		"id_wiersza" 	number(10,0)
-	,	"nr_wersu" 		number(10,0)
-	,	"id_wersu" 		number(10,0)
-	,	constraint 		"pk_wiersze" primary key("id_wiersza", "nr_wersu", "id_wersu")
-	,	constraint 		"fk_id_wersu" foreign key("id_wersu") references wersy("id")
-);
+create table  "autor" (	
+		"id" number generated always as identity
+	,	"imie" varchar2(50)
+	,	"nazwisko" varchar2(50)
+	, 	constraint "pk_autor" primary key ("id")
+)
+/
+create table  "wiersze" (
+		"id_wiersza" number(10,0)
+	, 	"nr_wersu" number(10,0)
+	, 	"id_wersu" number(10,0)
+	, 	"id_autor" number, 
+	constraint "pk_wiersze" primary key ("id_wiersza", "nr_wersu", "id_wersu")
+)
+/
+alter table  "wiersze" add constraint "fk_id_wersu" foreign key ("id_wersu")
+	  references  "wersy" ("id") enable
+/
+alter table  "wiersze" add constraint "fk_wiersz_autor" foreign key ("id_autor")
+	  references  "autor" ("id") enable
+/
+
 --utworzenie typu tabelarycznego
 create or replace type t_tbl is table of varchar2(1000);
 -- pakiet pck_wiersz
@@ -59,8 +74,8 @@ begin
     loop
         select id, wers into v_id, v_wers from wersy 
         order by dbms_random.value() fetch first 1 row only;
-        insert into wiersze(id_wiersza, nr_wersu, id_wersu)
-            values(v_id_wiersza, i, v_id);
+        insert into wiersze(id_wiersza, nr_wersu, id_wersu, id_autor)
+            values(v_id_wiersza, i, v_id, round(dbms_random.value(1,10),2));
         dbms_output.put_line(v_wers);
     end loop;
 end generuj;
@@ -73,7 +88,7 @@ begin
     where w1.id_wiersza = p_id_wiersza
     order by w1.nr_wersu;
     return t_wiersz;
-end wyswietl_wiersz;
+end;
 ---------------------------------------------
 end pck_wiersz;
 
@@ -689,13 +704,523 @@ w trumnie też nie każdy dumnie leży/
 kiedy jest nudnością życia .../
 
 ...niech sobie poduma.../
+
+Widzę, widzę łuk miesiąca//
+Przez listowie gęstych rokit,//
+Słyszę, słyszę stuk tętniący//
+Nie podkutych dźwięcznych kopyt.//
+
+Ach, i ciebie sen nie morzy,//
+Przez rok mnie nie zapomniałeś,//
+Przyzwyczaić się nie możesz,//
+Żeby łóżko pustką wiało?//
+ 
+Czy nie z tobą dyskurs toczę//
+W chciwych ptaków ostrym tonie,//
+Czyż nie w twoje patrzę oczy//
+Z czystych, zmatowiałych stronic?//
+
+Czemu się, jak rabuś, znowu//
+Skradasz, krążysz niedaleko?//
+Czy pamiętasz tę umowę://
+Na mnie żywą ciągle czekać?//
+
+Już zasypiam. W duszne ciemnie//
+Księżyc rzucił ostrze swoje.//
+Znowu stukot. Ach, to we mnie//
+Bije ciepłe serce moje.//
+
+Znowu więdną wszystkie zioła,//
+Tylko srebrne astry kwitną,//
+Zapatrzone w chłodną niebios//
+Toń błękitną.//
+
+Jakże smutna teraz jesień,//
+Ach, smutniejsza niż przed laty,//
+Choć tak samo żółkną liście.//
+Więdną kwiaty,//
+
+I tak samo noc miesięczna//
+Sieje jasność, smutek, ciszę//
+I tak samo drzew wierzchołki//
+Wiatr kołysze.//
+
+Ale teraz braknie sercu/
+Tych upojeń i uniesień,/
+Co swym czarem ożywiały/
+Smutną jesień./
+
+Dawniej miała noc jesienna/
+Dźwięk rozkoszy w swoim hymnie,/
+Bo aielska, czysta postać/
+Stała przy mnie./
+
+Przypominam jeszcze teraz/
+Bladej twarzy alabastry,/
+Kruzce włosy, a we włosach/
+Srebrne astry./
+
+Widzę jeszcze ciemne oczy/
+I pieszczotę w ich spojrzeniu/
+Widzę wszystko w księżycowym/
+Oświetleniu./
+
+Widziałem cię wczoraj w nocy – siedziałaś na regale z książkami /
+i rzeźbiłaś w drewnie wiewiórki; księżyc ciął je na plastry. Cienie /
+przechyliły się lekko w przyszłość – w kierunku zielonej lampki. /
+
+Wcześniej milczałaś o końcu świata; że musisz uciec, że nie starczy /
+świętości dla nas i dla kanarka. Choć on nie może zmartwychwstać, /
+na twoich kolanach ciągle stygnie marzenie, najsmutniejsza klatka. /
+
+Ale smutek to odtwarzanie na gramofonie Armstronga. Nierówne /
+rytmy, wspólne światełka, żółte kreski na chodniku pod blokiem. /
+Jako dzieci patrzyliśmy w niebo – dzisiaj ono kaleczy nam stopy. /
+
+On działa, w blasku i w ciemności,/
+w huku wodospadów i w ciszy snu,/
+lecz inaczej, niż głoszą wasi/
+pasterze, pozostający pod dobrą/
+opieką. szuka najdłuższej linii,/
+drogi, która jest tak okrężna, że/
+prawie niewidoczna. Gubi się/
+w cierpieniu. Tylko ślepcy, tylko/
+sowy czują czasem jej nikły ślad/
+pod powieką./
+
+Posłuchaj pan, panie podróżny,/
+co się zdarzyło na Próżnej:/
+Żyła tam Jagna, dobra i czysta,/
+i chodził do niej Jan kancelista,/
+akurat to była niedziela,/
+kręciła się karuzela./
+Zabrał tam Jagnę kochanek czuły/
+i całkiem zmącił jej miły umysł./
+
+Oczy tej małej jak dwa błękity,/
+myśli tej małej - białe zeszyty./
+A on był dla niej jak młody bóg,/
+żebyż on jeszcze kochać mógł./
+
+A lato, jak bywa w Warszawie,/
+młodym slużyło łaskawie./
+On ją zabierał nieraz na lodki,/
+a ona jego leczyła smutki./
+Posłuchaj pan, panie wędrowny:/
+nastał ten dzień niewymowny,/
+odszedł bez słowa kochanek podły,/
+na nic się zdały płacz jej i modły./
+
+Oczy tej małej jak dwa błękity,/
+myśli tej małej - białe zeszyty./
+A on był dla niej jak młody bóg,/
+żebyż on jeszcze kochać mógł./
+
+Pociągi odchodzą i statki,/
+ona nie wróci do matki./
+Kto by uwierzył w całym Makowie,/
+że dla niej światem był jeden człowiek./
+Przez niego więc siebie zabiła/
+ta, co z miłości tańczyła./
+Bóg jej wybaczył czyny sercowe/
+i lody podał jej malinowe./
+
+Oczy tej małej jak dwa błękity,/
+myśli tej małej - białe zeszyty./
+A on był dla niej więcej niż Bóg,/
+żebyż on jeszcze kochać mógł./
+/
+Posłuchaj, niewierny kochanku,/
+co nienawidzisz poranków:/
+wróci jeszcze do ciebie ta trumna,/
+gdzie leży twoja kochanka dumna./
+Bo taki, co kochać nie umie,/
+przegra - choć wszystko rozumie./
+Bóg cię pokaże swą nieczułością/
+za to, żeś gardził ludzką miłością./
+
+Oczy tej małej jak dwa błękity,/
+myśli tej małej - białe zeszyty./
+A tyś był dla niej więcej niż Bóg,/
+pokłoń się do jej martwych nóg./
+
+Myślałam, że dawno umarłeś, ale/
+gdybyś był martwy, albo przynajmniej snem, który się wypełnił/
+twoja twarz wyglądałaby inaczej. I inny jest ten wiosenny poranek,/
+kiedy wracam na przekór rozkładowi, tam, gdzie nagrobek zapada/
+w wilgotną trawę zagajnika – tam wszystko milczy: gałęzie, drzewa;/
+tam nawet kwiaty są chore. A wzgórze rośnie w rytm stałego przyciągania/
+zdumiewająco brzydkiego krajobrazu, by zaraz się przewrócić całym/
+ciężarem ustalonego już wcześniej porządku. Teraz jest zima./
+Jest ciepło, bo siedzę w ogrzanym pokoju. Mam książki, trochę mebli/
+i twój portret, który patrzy na mnie ze ściany. Więc śmiech nadal/
+wykrzywia ci twarz? Ale wejdź, zamieszkaj. Za oknem? Nic takiego./
+Jedyna ścieżka. Jedyne miejsce dokąd można pójść – twój grób./
+Ale nigdy nie byłam. A teraz zabierz mnie jak zakładnika./
+Zawlecz nonszalancko w głąb twojego la la landu, a ja pozwolę ci kręcić/
+kołami mojej plisowanej spódnicy, aż twoje oczy staną się różowe,/
+zawstydzając złote oparzenia wewnątrz fałd mojego serducha./
+A potem utopmy się obydwoje w fasolowym piure z ziemniakami./
+
+Obejrzawszy importowanych filmów niejedną setkę,/
+Pewna mała grupka ludności chciała sobie urządzić orgietkę./
+Ściśle biorąc, tylko cztery osoby, tak: John Dreptak, Rene Trypućko,/
+Jedna pani Bzibziakowa i panna Lucy Jamochłon, zwana na codzień Lućką./
+
+Bzibziakowa przyniosła patefon, Trypućko przytargał pół basa/
+I wszyscy wesolutko porozbierali się na golasa,/
+Co było zresztą praktyczne z powodu letniej spiekoty,/
+Po czym John Dreptak z energią zawołał: - No do roboty!/
+
+- Do roboty! - krzyknęli wszyscy, lecz tu wpadli w stary mechanizm,/
+I Trypućko wywiesił hasło "MAŁA ORGIA WZMACNIA ORGANIZM"./
+"Przez orgię do dobrobytu!" - krzyknęła pani Bzibziakowa,/
+A John Dreptak wygłosił referat: "Orgia wsteczna, a orgia postępowa"/
+
+Nazwali tę orgię imieniem Czwartej Dywizji Moździerzy,/
+Uchwalili, że nawiążą kontakt z XIV Chorągwią Harcerzy,/
+Po czym John Dreptak uchwałę końcową zgrabnie wymaścił,/
+Rozpoczynając słowami: "My, Zjednoczeni Orgiaści..."/
+
+A kończąc ogólnym apelem, który w każdej uchwale błyska,/
+Że należy się przeciwstawić tak: zagrożeniu środowiska,/
+Hałasowi, chorobom psychicznym i rozbijaniu atomów./
+Tu ubrali się, pozapinali, i poszli do swoich domów./
+
+Zaś wieczorem Dreptak do Trypućki zadzwonił z taką uwagą:/
+- Stary, bardzo fajnie nam to wyszło, tylko czemu żeśmy byli nago?/
+- Właśnie nie wiem! - odparł Trypućko. - W garniturach my by też mogli/
+I w ten sposób wytworzył się model Uroczystej Akademii, czyli - Polskiej Orgii./
+
+Coraz trudniej nam pisać do Ciebie/
+coraz trudniej do Ciebie nam być/
+coraz trudniej przerobić na siedem/
+numer nieba pod którym przyszło nam żyć/
+ 
+Kiedy chciałem byś przerwała tę zabawę/
+Byleś wreszcie poszła za mną/
+Jakiś kułak intelektu/
+powiedział że wyrywam Cię z kontekstu/
+i że dura lex i sed lex/
+albo jakoś tak podobnie się wyraził/
+języki obce są mi obce/
+i nie wiem co te słowa znaczą/
+ale jestem prawie pewien/
+i mnie i Ciebie tym obraził/
+ 
+Coraz trudniej nam pisać do Ciebie/
+coraz trudniej do Ciebie nam być/
+coraz trudniej przerobić na siedem/
+numer nieba pod którym przyszło nam żyć/
+ 
+Tyś już przecież ani wielka, ani piękna/
+już niemłoda, chyba niezbyt mądra jeszcze/
+i ja mam niewiele więcej/
+mam w zanadrzu już ostatnie moje serce/
+i z kim ja się mam pogodzić/
+z Tobą, czy z tym rzeczy stanem/
+jeśli z Tobą - Ty mnie pogódź/
+bo ja mogę żyć bez Ciebie/
+jak nic złego się nie stało/
+tak nic złego się nie stanie/
+ 
+Coraz trudniej nam pisać do Ciebie/
+coraz trudniej do Ciebie nam być/
+coraz trudniej przerobić na siedem/
+numer nieba pod którym przyszło nam żyć/
+ 
+A wolność to nie jest port, nie adres i nie przystań/
+wolność, to ona po to może być, żeby z niej czasem/
+nie skorzystać.../
+
+Dam ci w prezencie miasteczka/
+Małe smutne miasteczka/
+
+Miasteczka w naszych rękach/
+są bardziej ponure niż zabawki/
+lecz równie łatwe w obsłudze/
+
+Bawię się miasteczkami/
+Rozpruwam je/
+Żaden człowiek mi stąd się nie wymknie/
+Ni kwiatek ni dziecko/
+
+Małe miasteczka są puste/
+są zdane na łaskę naszych rąk/
+
+Podsłuchuję z uchem przy drzwiach/
+Przy kolejnych drzwiach moje ucho/
+
+Domy podobne są do niemych muszli/
+Ich wystygłe spirale/
+nie przechowały nawet echa wiatru/
+ni szmeru wody/
+
+Parki i ogrody są martwe/
+Zabawy ponumerowane/
+jak w muzeum/
+Nie wiem gdzie pochowano/
+zamarznięte całka ptaków/
+
+Ulice aż dźwięczą od ciszy/
+A echo ciszy jest ciężkie/
+O wiele cięższe/
+niż słowa groźby czy miłości/
+
+Kolej na mnie/
+Porzucam miasteczka mojego dzieciństwa/
+A tobie oddaję pełnię/
+ich samotności/
+
+Czy rozumiesz grozę tego daru?/
+Dałam ci dziwne i smutne miasteczka/
+by ci się przyśniły/
+
+Zamykam oczy, może otwieram/
+w niebo spoglądam. Jakieś białe.../
+Nie wiem czy żyję, czy umieram/
+Boję się wiedzieć, więc nie pytałem./
+
+Łzy mi podano, wiszą w kroplówce,/
+nadziei płynnej klepsydrze./
+Leżę jak mięso na śmierci stołówce/
+Ta zaraz serce mi wydrze./
+
+Są jakieś słowa, kilka zeszytów./
+W zaświat ma dusza migruje/
+Zostało na chwilę niebo z sufitu/
+I wiersz jakiś kiedyś/
+ktoś ekshumuje./
+
+Leszczyny z brzozy wyciągają do mnie młodzieńcze palce liści/
+W drewnianej izbie Paweł Kochański gra III Koncert skrzypcowy/
+i przerywa zapatrzony w sino-szare Tatry/
+Szelest potoku na kamieniach czy szum starości w uszach/
+Styks płynie pod ścianami mojego pokoju/
+
+Bóle w klatce piersiowej nie oznaczają zawału/
+Okno ciemnieje i światła latarni kołyszą się jak wisielcy nad ulicą/
+Córka przez telefon opowiada niedzielę na Mazurach z synem i psem/
+Wrony lecą wśród fal zielono-fioletowych chmur/
+i w świetlistych witrażach karminu/
+
+Wszystkie egzaminy oblane W oczach młodszego brata pogarda/
+Szosą jedzie chłopak na rowerze – za kościołem skręca/
+czarną ścieżką w świerkowy las/
+W plecaku ma dwie książki zeszyt cztery pudełka/
+tabletek nasennych i butelkę wody/
+Stoi na łące i obserwuje lot siwej czapli/
+Wstyd ucieczki i duma każą mu jechać do Warszawy/
+Puste wieczorne ulice i zapach wiosennego deszczu/
+Gdybyś zrobił to wtedy, nie myślałbyś o tym teraz/
+
+Kwas i dreszcze już na samą myśl/
+Bo mam przeczucie, że to koniec/
+Przyszłaś na czas/
+Nie będzie gwiezdnych wojen/
+Dobrze wiem, co myślisz sobie/
+
+Znowu będzie miło, bo tak już masz/
+Dokończ, nie skończyłaś, no pij do dna/
+Ja się wstrzymam, jakoś mi cierpi krtań/
+Nie płacz po niej/
+
+Zawodzę jak miastowa młodzież/
+Hej, no może coś powiesz?/
+Czekaj, widzę prognozę/
+Przewidują zgodę/
+
+Marudzę jak miastowa młodzież/
+Nie, to nie ta odpowiedź/
+Dlaczego mi zmieniasz pogodę?/
+Pozostaje odejść/
+
+Fakt, że całkiem to przyjemne, gdy/
+Gniew odbiera mi kulturę/
+Od kilku dni tak bardzo denerwujesz/
+Przejdzie mi, ale zdążę jeszcze/
+
+Wcisnąć komu trzeba największy kit, że/
+Wstałem, nie chcę od niej kompletnie nic/
+Patrzę sobie na twój najnowszy klip/
+
+Zawodzę jak miastowa młodzież/
+Hej, no może coś powiesz?/
+Czekaj, widzę prognozę/
+Przewidują zgodę/
+
+Marudzę jak miastowa młodzież/
+Nie, to nie ta odpowiedź/
+Dlaczego mi zmieniasz pogodę?/
+Pozostaje odejść/
+
+Zawodzę jak miastowa młodzież/
+Hej, no może coś powiesz?/
+Czekaj, widzę prognozę/
+Przewidują zgodę/
+
+Marudzę jak miastowa młodzież/
+Nie, to nie ta odpowiedź/
+Dlaczego mi zmieniasz pogodę?/
+Pozostaje odejść/
+
+Obuta jesteś jedynie w noc/
+i te obcasy, co idą/
+za echem twoich kroków/
+melodyjnych,/
+harmonijnych/
+i rytmicznie wzniesionych/
+aż do nieba/
+- albo przynajmniej z fotela do sufitu -/
+postępujących za długością twych nóg/
+uradowanych/
+tak wielkim pięknem,/
+co wznosi się i opada./
+
+(Od obcasów po twoje włosy/
+– tak rudawo podobne to/, co w górze/
+i w dole –/
+cała twoja nagość/
+ledwie rozebrana/
+z koronek)/
+
+Szybkie,/
+psotne,/
+butne./
+
+Zdjąć albo nie zdjąć/
+i kroczyć płynąc bez określonego kursu./
+
+Łodzią są buty twoje,/
+a nieskończoność/
+morzem./
+
+Idź dokąd poszli tamci do ciemnego kresu/
+po złote runo nicości twoją ostatnią nagrodę/
+idź wyprostowany wśród tych co na kolanach/
+wśród odwróconych plecami i obalonych w proch/
+ocalałeś nie po to aby żyć/
+masz mało czasu trzeba dać świadectwo/
+bądź odważny gdy rozum zawodzi bądź odważny/
+w ostatecznym rachunku jedynie to się liczy/
+a Gniew twój bezsilny niech będzie jak morze/
+ilekroć usłyszysz głos poniżonych i bitych/
+niech nie opuszcza ciebie twoja siostra Pogarda/
+dla szpiclów katów tchórzy - oni wygrają/
+pójdą na twój pogrzeb i z ulgą rzucą grudę/
+a kornik napisze twój uładzony życiorys/
+i nie przebaczaj zaiste nie w twojej mocy/
+przebaczać w imieniu tych których zdradzono o świcie/
+strzeż się jednak dumy niepotrzebnej/
+oglądaj w lustrze swą błazeńską twarz/
+powtarzaj: zostałem powołany - czyż nie było lepszych/
+strzeż się oschłości serca kochaj źródło zaranne/
+ptaka o nieznanym imieniu dąb zimowy/
+światło na murze splendor nieba/
+one nie potrzebują twego ciepłego oddechu/
+są po to aby mówić: nikt cię nie pocieszy/
+czuwaj - kiedy światło na górach daje znak - wstań i/
+idź/
+dopóki krew obraca w piersi twoją ciemną gwiazdę/
+powtarzaj stare zaklęcia ludzkości bajki i legendy/
+bo tak zdobędziesz dobro którego nie zdobędziesz/
+powtarzaj wielkie słowa powtarzaj je z uporem/
+jak ci co szli przez pustynię i ginęli w piasku/
+a nagrodzą cię za to tym co mają pod ręką/
+chłostą śmiechu zabójstwem na śmietniku/
+idź bo tylko tak będziesz przyjęty do grona zimnych/
+czaszek/
+do grona twoich przodków: Gilgamesza Hektora/
+Rolanda/
+obrońców królestwa bez kresu i miasta popiołów/
+Bądź wierny Idź/
 ');
 end;
 
 --wstawianie wierszy za pomocą procedury 
 begin
-    for i in 1..30
+    for i in 1..100
     loop
-        pck_wiersz.generuj(trunc(dbms_random.value(2, 20)));
+        pck_wiersz.generuj(round(dbms_random.value(3, 18), 2));
     end loop;
 end;
+
+insert into autor (
+    imie,
+    nazwisko
+) values (
+    'Gricelda',
+    'Luebbers'
+);
+
+insert into autor (
+    imie,
+    nazwisko
+) values (
+    'Dean',
+    'Bollich'
+);
+
+insert into autor (
+    imie,
+    nazwisko
+) values (
+    'Milo',
+    'Manoni'
+);
+
+insert into autor (
+    imie,
+    nazwisko
+) values (
+    'Laurice',
+    'Karl'
+);
+
+insert into autor (
+    imie,
+    nazwisko
+) values (
+    'August',
+    'Rupel'
+);
+
+insert into autor (
+    imie,
+    nazwisko
+) values (
+    'Salome',
+    'Guisti'
+);
+
+insert into autor (
+    imie,
+    nazwisko
+) values (
+    'Lovie',
+    'Ritacco'
+);
+
+insert into autor (
+    imie,
+    nazwisko
+) values (
+    'Chaya',
+    'Greczkowski'
+);
+
+insert into autor (
+    imie,
+    nazwisko
+) values (
+    'Twila',
+    'Coolbeth'
+);
+
+insert into autor ( 
+    imie,
+    nazwisko
+) values (
+    'Carlotta',
+    'Achenbach'
+);
